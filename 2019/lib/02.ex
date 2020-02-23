@@ -16,6 +16,12 @@ defmodule Day02 do
     Map.replace!(inputs, target_index, value)
   end
 
+  def initial_replace(inputs, noun, verb) do
+    inputs
+    |> List.replace_at(1, noun)
+    |> List.replace_at(2, verb)
+  end
+
   def solve1(inputs) do
     as_map =
       inputs
@@ -42,11 +48,26 @@ defmodule Day02 do
       end
     end)
   end
+
+  def solve2(inputs) do
+    Enum.to_list(0..99)
+    |> Enum.each(fn noun ->
+      Enum.to_list(0..99)
+      |> Enum.each(fn verb ->
+        result =
+          inputs
+          |> initial_replace(noun, verb)
+          |> solve1
+          |> Map.get(0)
+
+        if result === 19_690_720 do
+          IO.puts('Found! noun = #{noun} verb = #{verb}')
+          IO.puts('Answer: #{100 * noun + verb}')
+        end
+      end)
+    end)
+  end
 end
 
 inputs
-|> List.replace_at(1, 12)
-|> List.replace_at(2, 2)
-|> Day02.solve1()
-|> Map.get(0)
-|> IO.inspect()
+|> Day02.solve2()
