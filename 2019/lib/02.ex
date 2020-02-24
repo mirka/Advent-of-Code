@@ -49,25 +49,40 @@ defmodule Day02 do
     end)
   end
 
-  def solve2(inputs) do
-    Enum.to_list(0..99)
-    |> Enum.each(fn noun ->
-      Enum.to_list(0..99)
-      |> Enum.each(fn verb ->
-        result =
-          inputs
-          |> initial_replace(noun, verb)
-          |> solve1
-          |> Map.get(0)
+  def try_all_replacements(inputs, noun, verb, {last_noun, last_verb, last_result}) do
+    cond do
+      last_result === 19_690_720 ->
+        {:ok, last_noun, last_verb}
 
-        if result === 19_690_720 do
-          IO.puts('Found! noun = #{noun} verb = #{verb}')
-          IO.puts('Answer: #{100 * noun + verb}')
-        end
-      end)
-    end)
+      noun >= 100 ->
+        {:error, 'Did not find answer.'}
+
+      noun < 100 && verb < 100 ->
+        result = get_replacement_result(inputs, noun, verb)
+        next_noun = if verb === 99, do: noun + 1, else: noun
+        next_verb = if verb === 99, do: 0, else: verb + 1
+        try_all_replacements(inputs, next_noun, next_verb, {noun, verb, result})
+    end
+  end
+
+  def get_replacement_result(inputs, noun, verb) do
+    inputs
+    |> initial_replace(noun, verb)
+    |> solve1
+    |> Map.get(0)
+  end
+
+  def solve2(inputs) do
+    try_all_replacements(inputs, 0, 0, {nil, nil, nil})
+    |> (fn result ->
+          case result do
+            {:error, message} ->
+              IO.puts(message)
+
+            {:ok, noun, verb} ->
+              IO.puts('Found! noun = #{noun} verb = #{verb}')
+              IO.puts('Answer: #{100 * noun + verb}')
+          end
+        end).()
   end
 end
-
-inputs
-|> Day02.solve2()
