@@ -98,13 +98,64 @@ defmodule Day03 do
     end)
   end
 
+  def distance_to_point_on_line(line, point) do
+    cond do
+      line.orientation === :horizontal && point.y === line.start.y &&
+          is_between(point.x, {line.start.x, line.end.x}) ->
+        abs(point.x - line.start.x)
+
+      line.orientation === :vertical && point.x === line.start.x &&
+          is_between(point.y, {line.start.y, line.end.y}) ->
+        abs(point.y - line.start.y)
+
+      true ->
+        nil
+    end
+  end
+
+  def get_line_length(%Line{} = line) do
+    abs(line.end.x - line.start.x) + abs(line.end.y - line.start.y)
+  end
+
+  def find_distance_to_point(lines, %Point{} = point) do
+    Enum.reduce_while(lines, 0, fn line, total_distance ->
+      case distance_to_point_on_line(line, point) do
+        nil -> {:cont, total_distance + get_line_length(line)}
+        distance -> {:halt, total_distance + distance}
+      end
+    end)
+  end
+
+  def find_cumulative_distance_to_closest_intersection([wire1, wire2]) do
+    Enum.reduce(wire1, [:infinity, wire2], fn head1,
+                                              [
+                                                closest,
+                                                [head2 | tail2]
+                                              ] ->
+      sum = head1 + head2
+      next = if sum < closest, do: sum, else: closest
+      [next, tail2]
+    end)
+    |> List.first()
+  end
+
   def solve1(input) do
     parse_wires_from_string(input)
     |> Enum.map(&get_lines_for_wire/1)
     |> get_all_intersections
     |> find_distance_to_closest_intersection
   end
-end
 
-Day03.solve1(input)
-|> IO.inspect()
+  def solve2(input) do
+    wires =
+      parse_wires_from_string(input)
+      |> Enum.map(&get_lines_for_wire/1)
+
+    intersections = get_all_intersections(wires)
+
+    Enum.map(wires, fn wire ->
+      Enum.map(intersections, fn point -> find_distance_to_point(wire, point) end)
+    end)
+    |> find_cumulative_distance_to_closest_intersection
+  end
+end
