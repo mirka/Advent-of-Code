@@ -29,6 +29,18 @@ defmodule Day05 do
       {4, [mode]} ->
         Opcode.output(program, pointer, mode)
 
+      {5, modes} ->
+        Opcode.jump(program, pointer, modes, fn n -> n !== 0 end)
+
+      {6, modes} ->
+        Opcode.jump(program, pointer, modes, fn n -> n === 0 end)
+
+      {7, modes} ->
+        Opcode.write_if(program, pointer, modes, fn n, m -> n < m end)
+
+      {8, modes} ->
+        Opcode.write_if(program, pointer, modes, fn n, m -> n === m end)
+
       {99, _} ->
         program
     end
@@ -77,6 +89,29 @@ defmodule Opcode do
     |> Day05.exec_opcode(pointer + 4)
   end
 
+  def jump(program, pointer, modes, test_func) do
+    param1_address = get_param(program, pointer + 1, Enum.at(modes, 0))
+    new_pointer_address = get_param(program, pointer + 2, Enum.at(modes, 1))
+
+    if test_func.(program[param1_address]) do
+      Day05.exec_opcode(program, program[new_pointer_address])
+    else
+      Day05.exec_opcode(program, pointer + 3)
+    end
+  end
+
+  def write_if(program, pointer, modes, test_func) do
+    param1_address = get_param(program, pointer + 1, Enum.at(modes, 0))
+    param2_address = get_param(program, pointer + 2, Enum.at(modes, 1))
+    answer_address = get_param(program, pointer + 3, Enum.at(modes, 2))
+
+    value_to_store =
+      if test_func.(program[param1_address], program[param2_address]), do: 1, else: 0
+
+    Map.replace!(program, answer_address, value_to_store)
+    |> Day05.exec_opcode(pointer + 4)
+  end
+
   def input(program, pointer, value) do
     address = get_param(program, pointer + 1, :position)
 
@@ -91,4 +126,4 @@ defmodule Opcode do
   end
 end
 
-# Day05.solve1(inputs, 1)
+Day05.solve1(inputs, 5)
