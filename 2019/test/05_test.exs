@@ -10,12 +10,13 @@ defmodule Day05Test do
   def run_with_input(program, input) do
     fn ->
       list_to_map(program)
-      |> exec_opcode(0, input)
+      |> Map.put(:inputs, [input])
+      |> exec_opcode(0)
     end
   end
 
   test "Part 1" do
-    assert capture_io(fn -> solve1([3, 0, 4, 0, 99], 5) end) === output_for_integer(5)
+    assert capture_io(fn -> solve1([3, 0, 4, 0, 99], [5]) end) === output_for_integer(5)
 
     assert list_to_map([1, 0, 0, 0, 99])
            |> exec_opcode(0)
