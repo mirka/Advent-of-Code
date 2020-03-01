@@ -43,13 +43,42 @@ defmodule Day06 do
     end)
   end
 
+  def get_parents(map, start_at, parents \\ []) do
+    if start_at === "COM" do
+      parents
+    else
+      parent = map[start_at].parent
+      get_parents(map, parent, parents ++ [parent])
+    end
+  end
+
+  def find_transfers_to_common_parent(map) do
+    you = get_parents(map, "YOU")
+    santa = get_parents(map, "SAN")
+
+    Enum.find_value(you, fn you_node ->
+      santa_transfers =
+        Enum.find_index(santa, fn santa_node ->
+          you_node === santa_node
+        end)
+
+      if santa_transfers do
+        you_transfers = Enum.find_index(you, fn node -> node === you_node end)
+        santa_transfers + you_transfers
+      end
+    end)
+  end
+
   def solve1(input) do
     parse_input(input)
     |> build_map
     |> append_orbit_counts
     |> sum_counts
   end
-end
 
-Day06.solve1(input)
-|> IO.inspect()
+  def solve2(input) do
+    parse_input(input)
+    |> build_map
+    |> find_transfers_to_common_parent
+  end
+end

@@ -25,4 +25,21 @@ K)L"
     assert test_orbit_count(input, "COM") === 0
     assert solve1(input) === 42
   end
+
+  test "Part 2" do
+    input = "COM)B
+B)C
+C)D
+D)E
+E)F
+B)G
+G)H
+D)I
+E)J
+J)K
+K)L
+K)YOU
+I)SAN"
+    assert solve2(input) === 4
+  end
 end
