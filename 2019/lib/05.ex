@@ -21,9 +21,14 @@ defmodule Day05 do
         Opcode.arithmetic(program, pointer, modes, &*/2)
 
       {3, _} ->
-        [input | tail] = program.inputs
-        new_program = Map.replace!(program, :inputs, tail)
-        Opcode.input(new_program, pointer, input)
+        if length(program.inputs) > 0 do
+          [input | tail] = program.inputs
+
+          Map.put(program, :inputs, tail)
+          |> Opcode.input(pointer, input)
+        else
+          Map.put(program, :resume_from, pointer)
+        end
 
       {4, [mode]} ->
         Opcode.output(program, pointer, mode)
@@ -41,15 +46,20 @@ defmodule Day05 do
         Opcode.write_if(program, pointer, modes, fn n, m -> n === m end)
 
       {99, _} ->
-        program
+        Map.put(program, :done, true)
     end
   end
 
   def solve1(program, inputs, return_immediately \\ false) do
-    list_to_map(program)
+    normalized_program = if is_list(program), do: list_to_map(program), else: program
+    start_from_pointer = Map.get(normalized_program, :resume_from, 0)
+
+    normalized_program
     |> Map.put(:return, return_immediately)
     |> Map.put(:inputs, inputs)
-    |> exec_opcode(0)
+    |> Map.delete(:outputs)
+    |> Map.delete(:resume_from)
+    |> exec_opcode(start_from_pointer)
   end
 end
 
@@ -122,16 +132,17 @@ defmodule Opcode do
 
   def output(program, pointer, mode) do
     address = get_param(program, pointer + 1, mode)
+    result = program[address]
 
     case Map.get(program, :return) do
       true ->
-        program[address]
+        result
 
       _ ->
-        IO.puts(program[address])
-        Day05.exec_opcode(program, pointer + 2)
+        Map.update(program, :outputs, [result], fn outputs -> outputs ++ [result] end)
+        |> Day05.exec_opcode(pointer + 2)
     end
   end
 end
 
-Day05.solve1(inputs, [5])
+# Day05.solve1(inputs, [5])
