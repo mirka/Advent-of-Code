@@ -96,12 +96,12 @@ defmodule Opcode do
   end
 
   def get_param(program, index, :relative) do
-    program.relative_base + get(program, index)
+    Map.get(program, :relative_base, 0) + get(program, index)
   end
 
   # Get by position
   def get_param(program, index, _) do
-    program[index]
+    get(program, index)
   end
 
   def arithmetic(program, pointer, modes, func) do
