@@ -62,4 +62,10 @@ defmodule Day11Test do
 
     assert panels2 === %HullPanels{direction: 270, position: {1, 4}, map: %{{2, 4} => 0}}
   end
+
+  test "Find bounds" do
+    map = %{{-2, 4} => 0, {3, 0} => 0, {5, -3} => 0}
+
+    assert find_bounds(map) === {[-2, 5], [-3, 4]}
+  end
 end

@@ -81,6 +81,17 @@ defmodule Day11 do
     end
   end
 
+  def find_bounds(map) do
+    coords = Map.keys(map)
+    {first_x, first_y} = Enum.at(coords, 0)
+
+    Enum.reduce(coords, {[first_x, first_x], [first_y, first_y]}, fn {x, y},
+                                                                     {[min_x, max_x],
+                                                                      [min_y, max_y]} ->
+      {[min(min_x, x), max(max_x, x)], [min(min_y, y), max(max_y, y)]}
+    end)
+  end
+
   def solve1(input) do
     input
     |> Day07.parse_input()
@@ -91,7 +102,26 @@ defmodule Day11 do
     |> Map.keys()
     |> length
   end
+
+  def solve2(input) do
+    map =
+      input
+      |> Day07.parse_input()
+      |> Day05.list_to_map()
+      |> Map.put(:panels, %HullPanels{map: %{{0, 0} => 1}})
+      |> exec_cycle(1)
+      |> Map.get(:map)
+
+    {[min_x, max_x], [min_y, max_y]} = find_bounds(map)
+
+    Enum.map(max_y..min_y, fn row ->
+      Enum.map(min_x..max_x, fn column ->
+        if map[{column, row}] === 1, do: "#", else: " "
+      end)
+      |> Enum.join("")
+    end)
+  end
 end
 
-Day11.solve1(input)
-|> IO.inspect()
+# Day11.solve2(input)
+# |> IO.inspect()
