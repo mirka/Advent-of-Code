@@ -63,6 +63,30 @@ defmodule PaintingRobot do
   end
 end
 
+defmodule ScreenDraw do
+  def find_bounds(map) do
+    coords = Map.keys(map)
+    {first_x, first_y} = Enum.at(coords, 0)
+
+    Enum.reduce(coords, {[first_x, first_x], [first_y, first_y]}, fn {x, y},
+                                                                     {[min_x, max_x],
+                                                                      [min_y, max_y]} ->
+      {[min(min_x, x), max(max_x, x)], [min(min_y, y), max(max_y, y)]}
+    end)
+  end
+
+  def render(bounds, pixel_func) do
+    {[min_x, max_x], [min_y, max_y]} = bounds
+
+    Enum.map(max_y..min_y, fn row ->
+      Enum.map(min_x..max_x, fn column ->
+        pixel_func.({column, row})
+      end)
+      |> Enum.join("")
+    end)
+  end
+end
+
 defmodule Day11 do
   def exec_cycle(program, input, count \\ 0) do
     new_program = Day05.solve1(program, [input])
@@ -79,17 +103,6 @@ defmodule Day11 do
       Map.put(new_program, :panels, new_panels)
       |> exec_cycle(current_color, count + 1)
     end
-  end
-
-  def find_bounds(map) do
-    coords = Map.keys(map)
-    {first_x, first_y} = Enum.at(coords, 0)
-
-    Enum.reduce(coords, {[first_x, first_x], [first_y, first_y]}, fn {x, y},
-                                                                     {[min_x, max_x],
-                                                                      [min_y, max_y]} ->
-      {[min(min_x, x), max(max_x, x)], [min(min_y, y), max(max_y, y)]}
-    end)
   end
 
   def solve1(input) do
@@ -112,14 +125,11 @@ defmodule Day11 do
       |> exec_cycle(1)
       |> Map.get(:map)
 
-    {[min_x, max_x], [min_y, max_y]} = find_bounds(map)
+    pixel_func = fn {column, row} ->
+      if map[{column, row}] === 1, do: "#", else: " "
+    end
 
-    Enum.map(max_y..min_y, fn row ->
-      Enum.map(min_x..max_x, fn column ->
-        if map[{column, row}] === 1, do: "#", else: " "
-      end)
-      |> Enum.join("")
-    end)
+    ScreenDraw.render(ScreenDraw.find_bounds(map), pixel_func)
   end
 end
 

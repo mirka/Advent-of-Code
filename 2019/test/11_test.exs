@@ -1,8 +1,8 @@
 defmodule Day11Test do
   use ExUnit.Case
-  import Day11
   require PaintingRobot
   require HullPanels
+  require ScreenDraw
 
   test "Normalize direction" do
     assert PaintingRobot.normalize_direction(0) === 0
@@ -66,6 +66,6 @@ defmodule Day11Test do
   test "Find bounds" do
     map = %{{-2, 4} => 0, {3, 0} => 0, {5, -3} => 0}
 
-    assert find_bounds(map) === {[-2, 5], [-3, 4]}
+    assert ScreenDraw.find_bounds(map) === {[-2, 5], [-3, 4]}
   end
 end
