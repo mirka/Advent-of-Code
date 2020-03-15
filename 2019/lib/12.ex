@@ -1,3 +1,5 @@
+require Math
+
 {:ok, input} = File.read("inputs/12.txt")
 
 defmodule Moon do
@@ -78,7 +80,7 @@ defmodule Day12 do
     |> apply_gravity(index + 1)
   end
 
-  def apply_velocity(%Moon{position: position, velocity: velocity} = moon) do
+  def apply_velocity(%{position: position, velocity: velocity} = moon) do
     updated_position = for {key, value} <- position, into: %{}, do: {key, value + velocity[key]}
     Map.put(moon, :position, updated_position)
   end
@@ -99,6 +101,41 @@ defmodule Day12 do
     end)
   end
 
+  def to_map(points) do
+    velocity = [0, 0, 0, 0]
+
+    Enum.reduce(points, {%{}, 0}, fn n, {map, index} ->
+      entry = %{position: %{n: n}, velocity: %{n: Enum.at(velocity, index)}}
+      {Map.put(map, index, entry), index + 1}
+    end)
+    |> elem(0)
+  end
+
+  def get_next_points(%{} = state) do
+    do_step(state)
+  end
+
+  def steps_until_repeat_for_point(points) do
+    first = to_map(points)
+
+    Stream.iterate(get_next_points(first), &get_next_points/1)
+    |> Enum.reduce_while(1, fn current, count ->
+      if current === first, do: {:halt, count}, else: {:cont, count + 1}
+    end)
+  end
+
+  def steps_until_repeat(moons) do
+    [x, y, z] =
+      Enum.map([:x, :y, :z], fn key ->
+        Map.values(moons)
+        |> Enum.map(& &1.position[key])
+        |> steps_until_repeat_for_point()
+      end)
+
+    Math.lcm(x, y)
+    |> Math.lcm(z)
+  end
+
   def solve1(input) do
     input
     |> parse_input()
@@ -106,7 +143,14 @@ defmodule Day12 do
     |> step_for(1000)
     |> calculate_total_energy()
   end
+
+  def solve2(input) do
+    input
+    |> parse_input()
+    |> to_moons()
+    |> steps_until_repeat()
+  end
 end
 
-# Day12.solve1(input)
+# Day12.solve2(input)
 # |> IO.inspect()

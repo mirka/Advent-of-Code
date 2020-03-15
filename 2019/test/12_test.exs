@@ -55,4 +55,29 @@ defmodule Day12Test do
            |> step_for(10)
            |> calculate_total_energy() === 179
   end
+
+  test "Get next points" do
+    assert get_next_points({[-1, 2, 4, 3], [0, 0, 0, 0]}) === %{
+             0 => %{position: %{n: 2}, velocity: %{n: 3}},
+             1 => %{position: %{n: 3}, velocity: %{n: 1}},
+             2 => %{position: %{n: 1}, velocity: %{n: -3}},
+             3 => %{position: %{n: 2}, velocity: %{n: -1}}
+           }
+  end
+
+  test "Steps until repeat for point" do
+    assert steps_until_repeat_for_point([-1, 2, 4, 3]) === 18
+  end
+
+  test "Steps until repeat" do
+    moons =
+      "<x=-1, y=0, z=2>
+<x=2, y=-10, z=-7>
+<x=4, y=-8, z=8>
+<x=3, y=5, z=-1>"
+      |> parse_input()
+      |> to_moons()
+
+    assert steps_until_repeat(moons) === 2772
+  end
 end
