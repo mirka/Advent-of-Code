@@ -57,7 +57,9 @@ defmodule Day12Test do
   end
 
   test "Get next points" do
-    assert get_next_points({[-1, 2, 4, 3], [0, 0, 0, 0]}) === %{
+    map = to_map([-1, 2, 4, 3])
+
+    assert get_next_points(map) === %{
              0 => %{position: %{n: 2}, velocity: %{n: 3}},
              1 => %{position: %{n: 3}, velocity: %{n: 1}},
              2 => %{position: %{n: 1}, velocity: %{n: -3}},
