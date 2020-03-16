@@ -76,17 +76,51 @@ defmodule Day14 do
     merged_deps = merge_deps(next_deps)
 
     if Map.keys(merged_deps) |> length() === 1 && Map.get(merged_deps, "ORE") do
-      merged_deps["ORE"]
+      {merged_deps["ORE"], next_stock}
     else
       get_total_ore_for_deps(merged_deps, recipes, next_stock)
     end
   end
 
+  def max_fuel(recipes) do
+    get_total_ore_for_deps(%{"FUEL" => 1}, recipes)
+  end
+
+  def multiply_stock(stock, multiplier) do
+    for {chemical, quantity} <- stock, into: %{}, do: {chemical, quantity * multiplier}
+  end
+
+  def get_estimate_fuel(ore_available, ore_per_fuel) do
+    (ore_available / ore_per_fuel) |> floor()
+  end
+
+  def calculate_max_fuel(recipes, ore_available, ore_per_fuel, stock, total \\ 0) do
+    estimate_fuel = get_estimate_fuel(ore_available, ore_per_fuel)
+
+    if estimate_fuel < 1 do
+      total
+    else
+      {ore_used, stock_left} = get_total_ore_for_deps(%{"FUEL" => estimate_fuel}, recipes, stock)
+      ore_left = ore_available - ore_used
+
+      calculate_max_fuel(recipes, ore_left, ore_per_fuel, stock_left, total + estimate_fuel)
+    end
+  end
+
   def solve1(input) do
     recipes = Day14_Parser.parse(input)
+
     get_total_ore_for_deps(%{"FUEL" => 1}, recipes)
+    |> elem(0)
+  end
+
+  def solve2(input) do
+    recipes = Day14_Parser.parse(input)
+    {ore_per_fuel, _} = get_total_ore_for_deps(%{"FUEL" => 1}, recipes)
+
+    calculate_max_fuel(recipes, 1_000_000_000_000, ore_per_fuel, %{})
   end
 end
 
-# Day14.solve1(input)
+# Day14.solve2(input)
 # |> IO.inspect()
