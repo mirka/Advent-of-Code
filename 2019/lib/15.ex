@@ -123,6 +123,20 @@ defmodule Day15 do
     end
   end
 
+  def minutes_to_deadend(program, direction, minutes \\ 1) do
+    new_program = RepairDroid.move_and_sweep(program, direction)
+    next_directions = RepairDroid.find_open_direction(new_program.droid, direction)
+
+    if length(next_directions) === 0 do
+      minutes
+    else
+      Enum.map(next_directions, fn direction ->
+        minutes_to_deadend(new_program, direction, minutes + 1)
+      end)
+      |> List.flatten()
+    end
+  end
+
   def solve1(program) do
     {new_program, steps} =
       program
@@ -134,7 +148,19 @@ defmodule Day15 do
     print(new_program)
     steps
   end
+
+  def solve2(program) do
+    {program_at_oxygen_system, _} =
+      program
+      |> Day07.parse_input()
+      |> Day05.list_to_map()
+      |> Map.put(:droid, %RepairDroid{})
+      |> venture(3)
+
+    minutes_to_deadend(program_at_oxygen_system, 3)
+    |> Enum.reduce(0, fn minutes, max -> max(minutes, max) end)
+  end
 end
 
-# Day15.solve1(input)
+# Day15.solve2(input)
 # |> IO.inspect()
