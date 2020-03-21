@@ -14,11 +14,13 @@ defmodule Day16 do
 
     Enum.concat(list)
     |> Stream.cycle()
-    |> Stream.drop(1)
   end
 
   def calculate_output_digit(input, size, element_index) do
-    pattern = make_pattern_stream(element_index) |> Enum.take(size)
+    pattern =
+      make_pattern_stream(element_index)
+      |> Stream.drop(element_index + 1)
+      |> Enum.take(size)
 
     {sum, _} =
       Enum.reduce(input, {0, pattern}, fn digit, {acc, [head | tail]} ->
@@ -29,9 +31,10 @@ defmodule Day16 do
   end
 
   def calculate_phase(input, size) do
-    Enum.reduce(input, {[], 0}, fn _, {acc, index} ->
-      result = calculate_output_digit(input, size, index)
-      {acc ++ [result], index + 1}
+    Enum.reduce(input, {[], input, 0}, fn _, {acc, remaining, index} ->
+      result = calculate_output_digit(remaining, size, index)
+      [_ | tail] = remaining
+      {acc ++ [result], tail, index + 1}
     end)
     |> elem(0)
   end

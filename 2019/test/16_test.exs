@@ -3,8 +3,8 @@ defmodule Day16Test do
   import Day16
 
   test "Pattern stream" do
-    assert make_pattern_stream(0) |> Enum.take(5) === [1, 0, -1, 0, 1]
-    assert make_pattern_stream(1) |> Enum.take(5) === [0, 1, 1, 0, 0]
+    assert make_pattern_stream(0) |> Enum.take(6) === [0, 1, 0, -1, 0, 1]
+    assert make_pattern_stream(1) |> Enum.take(6) === [0, 0, 1, 1, 0, 0]
   end
 
   test "Calculate output digit" do
