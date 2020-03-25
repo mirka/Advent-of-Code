@@ -16,34 +16,43 @@ defmodule Day16 do
     |> Stream.cycle()
   end
 
-  def calculate_output_digit(input, size, element_index) do
-    pattern =
-      make_pattern_stream(element_index)
-      |> Stream.drop(element_index + 1)
-      |> Enum.take(size)
+  def get_multiplier_from_cycle(cycle_index) do
+    cycle = cycle_index
 
+    case rem(cycle, 4) do
+      0 -> 0
+      1 -> 1
+      2 -> 0
+      3 -> -1
+    end
+  end
+
+  def get_phased_digit_value(digit, digit_index, element_index, offset \\ 1) do
+    cycle = div(digit_index + offset, element_index + 1)
+
+    digit * get_multiplier_from_cycle(cycle)
+  end
+
+  def calculate_output_digit(input, element_index) do
     {sum, _} =
-      Enum.reduce(input, {0, pattern}, fn digit, {acc, [head | tail]} ->
-        {acc + digit * head, tail}
+      Enum.reduce(input, {0, 0}, fn digit, {acc, index} ->
+        {acc + get_phased_digit_value(digit, index, element_index), index + 1}
       end)
 
     rem(sum, 10) |> abs()
   end
 
-  def calculate_phase(input, size) do
-    Enum.reduce(input, {[], input, 0}, fn _, {acc, remaining, index} ->
-      result = calculate_output_digit(remaining, size, index)
-      [_ | tail] = remaining
-      {acc ++ [result], tail, index + 1}
+  def calculate_phase(input) do
+    Enum.reduce(input, {[], 0}, fn _, {acc, index} ->
+      result = calculate_output_digit(input, index)
+      {acc ++ [result], index + 1}
     end)
     |> elem(0)
   end
 
   def exec_phases(input, phase_count) do
-    size = length(input)
-
     Enum.reduce(1..phase_count, input, fn _, signal ->
-      calculate_phase(signal, size)
+      calculate_phase(signal)
     end)
   end
 
