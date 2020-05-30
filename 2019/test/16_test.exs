@@ -38,4 +38,13 @@ defmodule Day16Test do
     assert get_phased_digit_value(9, 4, 2) === 9
     assert get_phased_digit_value(9, 5, 2) === 0
   end
+
+  test "Calculate phase (Part 2)" do
+    assert calculate_phase_simple([6, 7, 8]) === [1, 5, 8]
+    assert calculate_phase_simple([1, 5, 8]) === [4, 3, 8]
+  end
+
+  test "Execute phases (Part 2)" do
+    assert exec_phases_simple([6, 7, 8], 4) === [4, 9, 8]
+  end
 end

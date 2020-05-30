@@ -33,13 +33,17 @@ defmodule Day16 do
     digit * get_multiplier_from_cycle(cycle)
   end
 
+  def get_last_digit_of_int(int) do
+    rem(int, 10) |> abs()
+  end
+
   def calculate_output_digit(input, element_index) do
     {sum, _} =
       Enum.reduce(input, {0, 0}, fn digit, {acc, index} ->
         {acc + get_phased_digit_value(digit, index, element_index), index + 1}
       end)
 
-    rem(sum, 10) |> abs()
+    get_last_digit_of_int(sum)
   end
 
   def calculate_phase(input) do
@@ -62,7 +66,47 @@ defmodule Day16 do
     |> Enum.take(8)
     |> Enum.join()
   end
+
+  def get_significant_digits(digits, offset) do
+    digits
+    |> List.duplicate(10000)
+    |> List.flatten()
+    |> Enum.drop(offset)
+  end
+
+  def add_all_digits(digits) do
+    Enum.reduce(digits, 0, fn n, sum -> n + sum end)
+  end
+
+  def calculate_phase_simple(input) do
+    initial_result = add_all_digits(input)
+
+    Enum.reduce(input, {[], 0, initial_result}, fn digit, {acc, previous_digit, last_result} ->
+      result = last_result - previous_digit
+      {acc ++ [get_last_digit_of_int(result)], digit, result}
+    end)
+    |> elem(0)
+  end
+
+  def exec_phases_simple(input, phase_count) do
+    Enum.reduce(1..phase_count, input, fn _, signal ->
+      calculate_phase_simple(signal)
+    end)
+  end
+
+  def solve2(input) do
+    input_digits = parse_input(input)
+
+    {offset, _} =
+      String.slice(input, 0..6)
+      |> Integer.parse()
+
+    get_significant_digits(input_digits, offset)
+    |> exec_phases_simple(100)
+    |> Enum.take(8)
+    |> Enum.join()
+  end
 end
 
-# Day16.solve1(input)
+# Day16.solve2(input)
 # |> IO.inspect()
