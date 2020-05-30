@@ -78,19 +78,25 @@ defmodule Day16 do
     Enum.reduce(digits, 0, fn n, sum -> n + sum end)
   end
 
-  def calculate_phase_simple(input) do
-    initial_result = add_all_digits(input)
-
-    Enum.reduce(input, {[], 0, initial_result}, fn digit, {acc, previous_digit, last_result} ->
-      result = last_result - previous_digit
-      {acc ++ [get_last_digit_of_int(result)], digit, result}
+  def calculate_phase_simple(input, size) do
+    Enum.reduce(size..1, {%{}, 0}, fn index, {acc, last_result} ->
+      digit = input[index]
+      result = get_last_digit_of_int(last_result + digit)
+      {Map.put(acc, index, result), result}
     end)
     |> elem(0)
   end
 
+  def list_to_map(list) do
+    length = length(list)
+    1..length |> Stream.zip(list) |> Enum.into(%{})
+  end
+
   def exec_phases_simple(input, phase_count) do
-    Enum.reduce(1..phase_count, input, fn _, signal ->
-      calculate_phase_simple(signal)
+    input_as_map = list_to_map(input)
+
+    Enum.reduce(1..phase_count, input_as_map, fn _, signal ->
+      calculate_phase_simple(signal, map_size(input_as_map))
     end)
   end
 
@@ -101,12 +107,17 @@ defmodule Day16 do
       String.slice(input, 0..6)
       |> Integer.parse()
 
-    get_significant_digits(input_digits, offset)
-    |> exec_phases_simple(100)
-    |> Enum.take(8)
+    result =
+      get_significant_digits(input_digits, offset)
+      |> exec_phases_simple(100)
+
+    Enum.reduce(1..8, [], fn key, answer ->
+      answer ++ [result[key]]
+    end)
     |> Enum.join()
   end
 end
 
+# Takes about 1 min
 # Day16.solve2(input)
 # |> IO.inspect()

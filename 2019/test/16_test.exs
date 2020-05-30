@@ -40,11 +40,11 @@ defmodule Day16Test do
   end
 
   test "Calculate phase (Part 2)" do
-    assert calculate_phase_simple([6, 7, 8]) === [1, 5, 8]
-    assert calculate_phase_simple([1, 5, 8]) === [4, 3, 8]
+    assert calculate_phase_simple(%{1 => 6, 2 => 7, 3 => 8}, 3) === %{1 => 1, 2 => 5, 3 => 8}
+    assert calculate_phase_simple(%{1 => 1, 2 => 5, 3 => 8}, 3) === %{1 => 4, 2 => 3, 3 => 8}
   end
 
   test "Execute phases (Part 2)" do
-    assert exec_phases_simple([6, 7, 8], 4) === [4, 9, 8]
+    assert exec_phases_simple([6, 7, 8], 4) === %{1 => 4, 2 => 9, 3 => 8}
   end
 end
